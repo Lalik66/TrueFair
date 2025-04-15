@@ -42,6 +42,21 @@ export default function RegisterPage() {
       return;
     }
 
+    // Проверка формата email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Пожалуйста, введите корректный email');
+      setIsLoading(false);
+      return;
+    }
+
+    // Проверка длины пароля
+    if (formData.password.length < 6) {
+      setError('Пароль должен содержать не менее 6 символов');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       console.log('Отправка запроса на регистрацию...');
       const response = await fetch('/api/auth/register', {
@@ -61,7 +76,20 @@ export default function RegisterPage() {
       console.log('Ответ сервера:', response.status, data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка при регистрации');
+        // Более подробная обработка ошибок
+        if (response.status === 400) {
+          // Ошибка валидации
+          throw new Error(data.error || 'Ошибка валидации данных');
+        } else if (response.status === 409) {
+          // Конфликт (пользователь уже существует)
+          throw new Error(data.error || 'Пользователь с таким email уже существует');
+        } else if (response.status === 500) {
+          // Серверная ошибка
+          console.error('Ошибка сервера:', data);
+          throw new Error(data.error || 'Произошла ошибка на сервере. Пожалуйста, попробуйте позже.');
+        } else {
+          throw new Error(data.error || 'Ошибка при регистрации');
+        }
       }
 
       console.log('Регистрация успешна, перенаправление...');

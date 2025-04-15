@@ -27,9 +27,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Логирование информации о подключении к MongoDB (без пароля)
+    const mongoUri = process.env.MONGODB_URI || '';
+    const sanitizedUri = mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//[USERNAME]:[PASSWORD]@');
+    console.log('Подключение к MongoDB:', sanitizedUri);
+
     console.log('Подключение к базе данных...');
-    await dbConnect();
-    console.log('Подключение к базе данных успешно');
+    try {
+      await dbConnect();
+      console.log('Подключение к базе данных успешно');
+    } catch (dbError: any) {
+      console.error('Ошибка подключения к базе данных:', dbError.message);
+      return NextResponse.json(
+        { error: `Ошибка подключения к базе данных: ${dbError.message}` },
+        { status: 500 }
+      );
+    }
 
     // Проверка, существует ли пользователь с таким email
     console.log('Проверка существующего пользователя с email:', email.toLowerCase());
@@ -55,12 +68,12 @@ export async function POST(req: NextRequest) {
       email: email.toLowerCase(),
       passwordHash,
       role: 'user',
-      registeredAt: new Date(),
+      registrationDate: new Date(),
       savedCourses: [],
       favoriteCourses: [],
       lastLogin: new Date()
     };
-    console.log('Данные для создания пользователя:', userData);
+    console.log('Данные для создания пользователя:', JSON.stringify(userData));
     
     const user = await User.create(userData);
     console.log('Пользователь успешно создан с ID:', user._id);
@@ -81,11 +94,40 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Ошибка при регистрации пользователя:', error);
     console.error('Детали ошибки:', error.message);
+    console.error('Тип ошибки:', error.name);
+    console.error('Стек ошибки:', error.stack);
+
     if (error.name === 'ValidationError') {
       console.error('Ошибка валидации mongoose:', JSON.stringify(error.errors));
+      return NextResponse.json(
+        { error: `Ошибка валидации: ${Object.values(error.errors).map((e: any) => e.message).join(', ')}` },
+        { status: 400 }
+      );
     }
+    
     if (error.code === 11000) {
       console.error('Ошибка дубликата ключа:', error.keyValue);
+      return NextResponse.json(
+        { error: `Пользователь с таким ${Object.keys(error.keyValue)[0]} уже существует` },
+        { status: 409 }
+      );
+    }
+
+    // Ошибки подключения к MongoDB
+    if (error.name === 'MongoServerError') {
+      console.error('Ошибка сервера MongoDB:', error.message);
+      return NextResponse.json(
+        { error: `Ошибка базы данных: ${error.message}` },
+        { status: 500 }
+      );
+    }
+
+    if (error.name === 'MongoNetworkError') {
+      console.error('Ошибка сети MongoDB:', error.message);
+      return NextResponse.json(
+        { error: `Ошибка сети при подключении к базе данных: ${error.message}` },
+        { status: 500 }
+      );
     }
     
     return NextResponse.json(

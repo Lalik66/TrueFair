@@ -48,16 +48,17 @@ export default function CreateCoursePage() {
   };
 
   const addLesson = () => {
-    const newLesson: Lesson = {
-      title: "",
-      description: "",
-      youtubeVideoId: "",
-      duration: 0,
-      order: lessons.length + 1,
-      materials: []
-    };
-    
-    setLessons([...lessons, newLesson]);
+    setLessons([
+      ...lessons, 
+      { 
+        title: '', 
+        description: '', 
+        youtubeVideoId: '', 
+        duration: 0, 
+        order: lessons.length + 1,
+        materials: []
+      }
+    ]);
   };
 
   const removeLesson = (index: number) => {
@@ -69,15 +70,17 @@ export default function CreateCoursePage() {
     setLessons(updatedLessons);
   };
 
-  const handleAddMaterial = (lessonIndex: number, material: Material) => {
-    const newLessons = [...lessons];
+  const addMaterial = (lessonIndex: number) => {
+    const updatedLessons = [...lessons];
     
-    if (!newLessons[lessonIndex].materials) {
-      newLessons[lessonIndex].materials = [];
-    }
+    // Теперь TypeScript знает, что materials - это массив объектов Material
+    updatedLessons[lessonIndex].materials.push({
+      title: '',
+      fileUrl: '',
+      fileType: 'pdf'
+    });
     
-    newLessons[lessonIndex].materials.push(material);
-    setLessons(newLessons);
+    setLessons(updatedLessons);
   };
 
   const handleMaterialChange = (lessonIndex: number, materialIndex: number, field: string, value: string) => {
@@ -89,13 +92,11 @@ export default function CreateCoursePage() {
     setLessons(updatedLessons);
   };
 
-  const deleteMaterial = (lessonIndex: number, materialIndex: number) => {
+  const removeMaterial = (lessonIndex: number, materialIndex: number) => {
     const updatedLessons = [...lessons];
-    
-    if (updatedLessons[lessonIndex].materials) {
-      updatedLessons[lessonIndex].materials.splice(materialIndex, 1);
-    }
-    
+    updatedLessons[lessonIndex].materials = updatedLessons[lessonIndex].materials.filter(
+      (_, i) => i !== materialIndex
+    );
     setLessons(updatedLessons);
   };
 
@@ -352,7 +353,7 @@ export default function CreateCoursePage() {
                       <h4 className="text-md font-medium text-primary">Дополнительные материалы</h4>
                       <button
                         type="button"
-                        onClick={() => handleAddMaterial(index, { title: '', fileUrl: '', fileType: 'pdf' })}
+                        onClick={() => addMaterial(index)}
                         className="text-sm px-3 py-1 bg-indigo-600/20 text-indigo-400 rounded-md hover:bg-indigo-600/30 focus:outline-none"
                       >
                         Добавить материал
@@ -390,7 +391,7 @@ export default function CreateCoursePage() {
                             </select>
                             <button
                               type="button"
-                              onClick={() => deleteMaterial(index, materialIndex)}
+                              onClick={() => removeMaterial(index, materialIndex)}
                               className="p-1 bg-red-600/20 text-red-400 rounded-full hover:bg-red-600/30 focus:outline-none"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
