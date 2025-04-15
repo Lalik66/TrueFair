@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'your-s3-bucket.s3.amazonaws.com'], // Добавьте домен вашего S3 бакета
+    domains: ['localhost', 'i.ytimg.com', 'img.youtube.com'], // Домены для YouTube превью
   },
   // Для деплоя на Render
   output: 'standalone',

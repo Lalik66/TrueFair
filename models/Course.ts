@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 export interface ILesson {
   title: string;
   description: string;
-  videoUrl: string;
+  youtubeVideoId: string;
   duration: number;
   order: number;
   materials: {
@@ -36,7 +36,7 @@ const LessonSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  videoUrl: {
+  youtubeVideoId: {
     type: String,
     required: true,
   },
