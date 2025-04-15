@@ -3,6 +3,22 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Определение интерфейсов для типизации
+interface Material {
+  title: string;
+  fileUrl: string;
+  fileType: string;
+}
+
+interface Lesson {
+  title: string;
+  description: string;
+  youtubeVideoId: string;
+  duration: number;
+  order: number;
+  materials: Material[];
+}
+
 export default function CreateCoursePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +30,7 @@ export default function CreateCoursePage() {
   const [categories, setCategories] = useState('');
   const [tags, setTags] = useState('');
   
-  const [lessons, setLessons] = useState([
+  const [lessons, setLessons] = useState<Lesson[]>([
     { 
       title: '', 
       description: '', 
@@ -32,17 +48,16 @@ export default function CreateCoursePage() {
   };
 
   const addLesson = () => {
-    setLessons([
-      ...lessons, 
-      { 
-        title: '', 
-        description: '', 
-        youtubeVideoId: '', 
-        duration: 0, 
-        order: lessons.length + 1,
-        materials: []
-      }
-    ]);
+    const newLesson: Lesson = {
+      title: "",
+      description: "",
+      youtubeVideoId: "",
+      duration: 0,
+      order: lessons.length + 1,
+      materials: []
+    };
+    
+    setLessons([...lessons, newLesson]);
   };
 
   const removeLesson = (index: number) => {
@@ -54,19 +69,15 @@ export default function CreateCoursePage() {
     setLessons(updatedLessons);
   };
 
-  const addMaterial = (lessonIndex: number) => {
-    const updatedLessons = [...lessons];
-    if (!updatedLessons[lessonIndex].materials) {
-      updatedLessons[lessonIndex].materials = [];
+  const handleAddMaterial = (lessonIndex: number, material: Material) => {
+    const newLessons = [...lessons];
+    
+    if (!newLessons[lessonIndex].materials) {
+      newLessons[lessonIndex].materials = [];
     }
     
-    updatedLessons[lessonIndex].materials.push({
-      title: '',
-      fileUrl: '',
-      fileType: 'pdf'
-    });
-    
-    setLessons(updatedLessons);
+    newLessons[lessonIndex].materials.push(material);
+    setLessons(newLessons);
   };
 
   const handleMaterialChange = (lessonIndex: number, materialIndex: number, field: string, value: string) => {
@@ -78,11 +89,13 @@ export default function CreateCoursePage() {
     setLessons(updatedLessons);
   };
 
-  const removeMaterial = (lessonIndex: number, materialIndex: number) => {
+  const deleteMaterial = (lessonIndex: number, materialIndex: number) => {
     const updatedLessons = [...lessons];
-    updatedLessons[lessonIndex].materials = updatedLessons[lessonIndex].materials.filter(
-      (_, i) => i !== materialIndex
-    );
+    
+    if (updatedLessons[lessonIndex].materials) {
+      updatedLessons[lessonIndex].materials.splice(materialIndex, 1);
+    }
+    
     setLessons(updatedLessons);
   };
 
@@ -339,7 +352,7 @@ export default function CreateCoursePage() {
                       <h4 className="text-md font-medium text-primary">Дополнительные материалы</h4>
                       <button
                         type="button"
-                        onClick={() => addMaterial(index)}
+                        onClick={() => handleAddMaterial(index, { title: '', fileUrl: '', fileType: 'pdf' })}
                         className="text-sm px-3 py-1 bg-indigo-600/20 text-indigo-400 rounded-md hover:bg-indigo-600/30 focus:outline-none"
                       >
                         Добавить материал
@@ -377,7 +390,7 @@ export default function CreateCoursePage() {
                             </select>
                             <button
                               type="button"
-                              onClick={() => removeMaterial(index, materialIndex)}
+                              onClick={() => deleteMaterial(index, materialIndex)}
                               className="p-1 bg-red-600/20 text-red-400 rounded-full hover:bg-red-600/30 focus:outline-none"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
