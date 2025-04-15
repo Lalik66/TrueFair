@@ -7,49 +7,57 @@ export interface IUser {
   firstName: string;
   lastName: string;
   role: 'user' | 'admin';
-  savedCourses: string[];
-  favoriteCourses: string[];
+  savedCourses: mongoose.Types.ObjectId[];
+  favoriteCourses: mongoose.Types.ObjectId[];
   registrationDate: Date;
   lastLogin: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 }
 
+// При инициализации модели создадим логирование
+console.log('Инициализация модели User');
+
 const UserSchema = new mongoose.Schema<IUser>(
   {
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email обязателен'],
       unique: true,
       trim: true,
       lowercase: true,
     },
     passwordHash: {
       type: String,
-      required: true,
+      required: [true, 'Пароль обязателен'],
     },
     firstName: {
       type: String,
-      required: true,
+      required: [true, 'Имя обязательно'],
       trim: true,
     },
     lastName: {
       type: String,
-      required: true,
+      required: [true, 'Фамилия обязательна'],
       trim: true,
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: {
+        values: ['user', 'admin'],
+        message: 'Роль должна быть "user" или "admin"'
+      },
       default: 'user',
     },
     savedCourses: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Course',
+      default: [],
     }],
     favoriteCourses: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Course',
+      default: [],
     }],
     registrationDate: {
       type: Date,
@@ -67,4 +75,12 @@ const UserSchema = new mongoose.Schema<IUser>(
   }
 );
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema); 
+// Логирование при попытке создания модели
+console.log('Проверка существующей модели User:', mongoose.models.User ? 'Существует' : 'Не существует');
+
+// Экспортируем модель с дополнительной проверкой для избежания ошибок повторного определения
+const UserModel = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+
+console.log('Модель User успешно инициализирована');
+
+export default UserModel; 

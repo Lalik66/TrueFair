@@ -26,6 +26,8 @@ export default function RegisterPage() {
     setError('');
     setIsLoading(true);
 
+    console.log('Начало отправки формы регистрации', formData);
+
     // Валидация формы
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
       setError('Все поля обязательны для заполнения');
@@ -41,6 +43,7 @@ export default function RegisterPage() {
     }
 
     try {
+      console.log('Отправка запроса на регистрацию...');
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -55,14 +58,17 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
+      console.log('Ответ сервера:', response.status, data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Ошибка при регистрации');
       }
 
+      console.log('Регистрация успешна, перенаправление...');
       // Перенаправление на страницу входа
       router.push('/auth/login?registered=true');
     } catch (err: any) {
+      console.error('Ошибка при отправке формы регистрации:', err);
       setError(err.message || 'Произошла ошибка при регистрации');
     } finally {
       setIsLoading(false);
