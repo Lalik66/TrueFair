@@ -2,13 +2,13 @@ import mongoose from 'mongoose';
 
 export interface IUserCourseAccess {
   _id: string;
-  userId: string;
-  courseId: string;
-  promoCodeId: string;
+  userId: mongoose.Types.ObjectId;
+  courseId: mongoose.Types.ObjectId;
+  promoCodeId: mongoose.Types.ObjectId;
   grantedAt: Date;
   lastAccessed: Date;
   progress: {
-    lessonId: string;
+    lessonId: mongoose.Types.ObjectId;
     completed: boolean;
     lastViewedAt: Date;
     watchTimeSeconds: number;
@@ -21,17 +21,17 @@ const UserCourseAccessSchema = new mongoose.Schema<IUserCourseAccess>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
+    } as any,
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Course',
       required: true,
-    },
+    } as any,
     promoCodeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'PromoCode',
       required: true,
-    },
+    } as any,
     grantedAt: {
       type: Date,
       default: Date.now,
@@ -45,7 +45,7 @@ const UserCourseAccessSchema = new mongoose.Schema<IUserCourseAccess>(
         lessonId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Lesson',
-        },
+        } as any,
         completed: {
           type: Boolean,
           default: false,

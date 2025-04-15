@@ -3,11 +3,15 @@ import mongoose from 'mongoose';
 export interface IPromoCode {
   _id: string;
   code: string;
-  courseId: string;
+  courseId: mongoose.Types.ObjectId;
   expiresAt: Date;
   maxUses: number;
   usedCount: number;
   isActive: boolean;
+  // Виртуальные свойства
+  isExpired?: boolean;
+  isMaxUsesReached?: boolean;
+  isValid?: boolean;
 }
 
 const PromoCodeSchema = new mongoose.Schema<IPromoCode>(
@@ -23,7 +27,7 @@ const PromoCodeSchema = new mongoose.Schema<IPromoCode>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Course',
       required: true,
-    },
+    } as any,
     expiresAt: {
       type: Date,
       required: true,
