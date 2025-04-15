@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { getServerConfig } from '@/lib/config';
+import dbConnect from '@/lib/mongodb';
 
 export async function GET() {
   try {
@@ -63,9 +63,8 @@ export async function GET() {
       // Установка таймаута
       mongoose.set('connectTimeoutMS', 10000);
       
-      // Попытка подключения через функцию из серверного конфига
-      const config = getServerConfig();
-      await config.dbConnect();
+      // Попытка подключения через функцию dbConnect
+      await dbConnect();
       
       console.log('Mongoose connection established');
     }
