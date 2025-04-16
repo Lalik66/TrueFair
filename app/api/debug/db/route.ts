@@ -37,7 +37,6 @@ export async function GET() {
         collectionName: model.collection.name,
         schema: {
           paths: Object.keys(model.schema.paths),
-          options: model.schema.options,
         }
       };
     });
